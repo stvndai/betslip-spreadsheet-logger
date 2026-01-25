@@ -1,0 +1,13 @@
+train: C:\Users\Steven\Desktop\coder\betslip-spreadsheet-logger\annotated-betslips\train
+val: C:\Users\Steven\Desktop\coder\betslip-spreadsheet-logger\annotated-betslips\valid
+test: C:\Users\Steven\Desktop\coder\betslip-spreadsheet-logger\annotated-betslips\test
+
+nc: 4
+names: ['game', 'odds', 'payout', 'wager']
+
+# roboflow:
+#   workspace: footballanalysis-kdvpi
+#   project: betslip-features
+#   version: 1
+#   license: CC BY 4.0
+#   url: https://universe.roboflow.com/footballanalysis-kdvpi/betslip-features/dataset/1
