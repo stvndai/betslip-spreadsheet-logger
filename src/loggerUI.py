@@ -75,7 +75,7 @@ class App(ctk.CTk):
 
         # image frame (PASTE TARGET)
         self.imgFrame = ctk.CTkFrame(self, width=200, height=200)
-        self.imgFrame.grid(row=7, column=0, columnspan=2, pady=20)
+        self.imgFrame.grid(row=7, column=1, columnspan=2, pady=20)
         self.imgFrame.grid_propagate(False)
 
         self.pasteLabel = ctk.CTkLabel(
@@ -86,6 +86,15 @@ class App(ctk.CTk):
 
         # bind paste
         self.bind("<Control-v>", self.onPaste)
+
+        ## mapping
+
+        self.uiFieldMap = {
+            "game": self.gameValue,
+            "odds": self.oddsValue,
+            "wager": self.wagerValue,
+            "payout": self.payoutValue
+        }
         
 
     def onPaste(self, event=None):    
@@ -93,17 +102,21 @@ class App(ctk.CTk):
         if isinstance(img, Image.Image):
             self.img = img
             results = logger.runDetection(img)
+                
+            
             self.displayImage(img)
         
+
             for item in results:
                 print(item)
             
+            self.setResults(results)
+
     def displayImage(self, img):
         img.thumbnail((180, 180))
         self.tk_img = ctk.CTkImage(light_image=img, size=(img.width, img.height))
 
         self.pasteLabel.configure(image=self.tk_img, text="")
-
         
     def buttonCallback(self):
         print("button pressed")
@@ -118,3 +131,19 @@ class App(ctk.CTk):
         )
         if filePath:
             self.filePath.set(filePath)
+
+    def setResults(self, results):
+        best_per_field = {}
+
+        for item in results:
+            field = item["field"]
+            conf = item.get("confidence", 0)
+
+            # keep only highest confidence per field
+            if field not in best_per_field or conf > best_per_field[field]["confidence"]:
+                best_per_field[field] = item
+
+        # update UI
+        for field, item in best_per_field.items():
+            if field in self.uiFieldMap:
+                self.uiFieldMap[field].set(item["text"])

@@ -36,7 +36,7 @@ def runDetection(image, conf=0.4):
         raise TypeError("image must be PIL.Image or file path")
 
     # --- Run YOLO ---
-    results = model(img, conf=conf)
+    results = model(img, conf=conf, iou=0.5)
     extracted = []
 
     for r in results:
@@ -72,7 +72,8 @@ def runDetection(image, conf=0.4):
                 "text": text
             })
 
-    return extracted
+
+    return extracted 
 
 
 def pilToCv(img):
@@ -107,3 +108,4 @@ def clean_numeric_field(text):
     # Remove any internal spaces between symbol and number
     cleaned = "".join(m.replace(" ", "") for m in matches)
     return cleaned
+
