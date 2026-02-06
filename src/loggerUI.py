@@ -4,6 +4,7 @@ from tkinterdnd2 import DND_FILES, TkinterDnD
 from PIL import Image, ImageTk, ImageGrab
 import os
 import logger
+import spreadsheets
 
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
@@ -12,10 +13,11 @@ class App(ctk.CTk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title("App")
-        self.geometry("400x400")
+        self.geometry("640x480")
         self.img = None
 
-        
+
+        self.isFilePath = False
         self.filePath = ctk.StringVar(value="No file selected")
         
         # file
@@ -70,7 +72,7 @@ class App(ctk.CTk):
         self.selectFileButton.grid(row=5, column=1, columnspan=2, padx=20, pady=5)
         
         # write button
-        self.exportButton = ctk.CTkButton(self, text="write to file")
+        self.exportButton = ctk.CTkButton(self, text="write to file", command=self.writeCSV)
         self.exportButton.grid(row=6, column=1, columnspan=2)
 
         # image frame (PASTE TARGET)
@@ -84,6 +86,9 @@ class App(ctk.CTk):
         )
         self.pasteLabel.pack(expand=True)
 
+        self.writeConfirmationLabel = ctk.CTkLabel(self, textvariable="...")
+        self.writeConfirmationLabel.grid(row=8, column=0, padx=20, pady=5)
+        
         # bind paste
         self.bind("<Control-v>", self.onPaste)
 
@@ -101,8 +106,7 @@ class App(ctk.CTk):
         img = ImageGrab.grabclipboard()
         if isinstance(img, Image.Image):
             self.img = img
-            results = logger.runDetection(img)
-                
+            results = logger.runDetection(img) 
             
             self.displayImage(img)
         
@@ -118,19 +122,17 @@ class App(ctk.CTk):
 
         self.pasteLabel.configure(image=self.tk_img, text="")
         
-    def buttonCallback(self):
-        print("button pressed")
-        
     def openFile(self):
         filePath = filedialog.askopenfilename(
             title="select spreadsheet",
             filetypes=[
                 ("Spreadsheet files", "*.xlsx *.xls *.csv *.ods"),
-                ("All files", "*.*")
+                ("All files", "*.csv*")
             ]
         )
         if filePath:
-            self.filePath.set(filePath)
+            self.filePath.set(filePath)      
+            self.isFilePath = True 
 
     def setResults(self, results):
         best_per_field = {}
@@ -147,3 +149,10 @@ class App(ctk.CTk):
         for field, item in best_per_field.items():
             if field in self.uiFieldMap:
                 self.uiFieldMap[field].set(item["text"])
+
+    def writeCSV(self):
+        
+        newData = {field: var.get() for field, var in self.uiFieldMap.items()}
+        
+        if self.isFilePath:    
+            spreadsheets.write(self.filePath.get(), newData)

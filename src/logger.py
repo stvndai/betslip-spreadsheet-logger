@@ -18,8 +18,8 @@ model = YOLO("runs/detect/train/weights/best.pt")
 LABELS = {
     0: "game",
     1: "odds",
-    2: "wager",
-    3: "payout"
+    2: "payout",
+    3: "wager"
 }
 
 OCR_CONFIGS = {
@@ -84,8 +84,9 @@ def runDetection(image, conf=0.4):
             elif field_name in ("wager", "payout"):
                 text = clean_money(text)
             else:
-                text = clean_text_field(text) # Assuming you want basic cleaning here
+                text = text # Assuming you want basic cleaning here
 
+            text = remove_newlines(text)
             extracted.append({
                 "class_id": cls,
                 "field": field_name,
@@ -119,3 +120,5 @@ def extract_odds(text):
     match = re.search(r"[+-]\d{2,4}", text)
     return match.group() if match else None
 
+def remove_newlines(s: str) -> str:
+    return re.sub(r"[\r\n]+", "", s)
